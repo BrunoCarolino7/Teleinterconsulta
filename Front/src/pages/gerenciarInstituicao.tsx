@@ -33,7 +33,7 @@ export function GerenciarInstituicao() {
     const [emailalternativo, setEmailalternativo] = useState('');
     const [numeroConselho, setNumeroConselho] = useState('');
     const [telefone2, setTelefoneAlternativo] = useState('');
-    const [roleEnderecoxpessoas, setRoleEnderecoxpessoas] = useState();
+    const [roleEnderecoxpessoas, setRoleEnderecoxpessoas] = useState(0);
     const [hospitalSelecionado, setHospitalSelecionado] = useState<number | null>(null);
 
 
@@ -72,7 +72,6 @@ export function GerenciarInstituicao() {
         try {
             const response = await api.get(`usuario/obter/${userId}`);
             setHospitais(response.data.enderecoxpessoas || []);
-            setRoleEnderecoxpessoas(hospitais.flatMap((x: any) => x.rolesid))
             setMostraNomeHospital(response.data.enderecoxpessoas.map((hospital: any) => hospital.endereco.unSaude.razaosocial));
 
         } catch (error) {
@@ -85,6 +84,7 @@ export function GerenciarInstituicao() {
             const response = await api.get(`unsaude/profissionais/${idHospital}`);
             if (response.data[0] && response.data[0].enderecos) {
                 setEnderecoxPessoas(response.data[0].enderecos[0].enderecoxpessoas);
+                setRoleEnderecoxpessoas(hospitais.flatMap((x: any) => x.rolesid)[0])
                 setIdEndereco(idHospital);
                 setIdHospital(idHospital);
             } else {
@@ -222,7 +222,6 @@ export function GerenciarInstituicao() {
                                 />
                                 Adicionar hospital
                             </Button>
-
                         </Flex>
                         <Box overflowX="auto" overflowY="auto" maxHeight="310px">
                             <TableContainer>
@@ -265,7 +264,7 @@ export function GerenciarInstituicao() {
                     <Stack bg="whiteAlpha.700" p="6" boxShadow="md" mt="2rem" w="60%" ml="-18rem">
                         <Flex mb="8" justify="space-between" align="center">
                             <Heading size="lg" fontWeight="normal">{idHospital === 0 ? `Profissionais` : `Profissionais - ${mostraNomeHospital}`}</Heading>
-                            {idHospital === 0 && roleEnderecoxpessoas ? '' :
+                            {idHospital !== 0 && roleEnderecoxpessoas === 2 ? (
                                 <Button
                                     _hover={{ cursor: 'pointer', bg: 'gray.200' }}
                                     as="a"
@@ -291,6 +290,8 @@ export function GerenciarInstituicao() {
                                     />
                                     Adicionar usuário
                                 </Button>
+                            ) :
+                                ""
                             }
                         </Flex>
 
@@ -321,6 +322,7 @@ export function GerenciarInstituicao() {
                                                                             e.preventDefault();
                                                                             handleOpenEditarUsuarioModal();
                                                                             setIdUsuario(enderecoxpessoa.pessoa.id)
+                                                                            setRoleEnderecoxpessoas(enderecoxpessoa.rolesid)
                                                                         }}>
                                                                         <Icon as={MdOutlineModeEdit} />
                                                                     </Button>

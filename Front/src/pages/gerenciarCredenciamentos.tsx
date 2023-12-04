@@ -30,6 +30,7 @@ export function GerenciarCredenciamentos() {
     const [filtroAtual, setFiltroAtual] = useState('');
     const [enderecoId, setEnderecoId] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [checkboxValue, setCheckboxValue] = useState('');
     const [value, setValue] = useState('');
 
     useEffect(() => {
@@ -73,7 +74,7 @@ export function GerenciarCredenciamentos() {
     const credenciamentosFiltraodos = instituicoesListaCred.filter((item: any) => item.enderecosolicitado.unSaude.razaosocial.toUpperCase().normalize("NFD").replace(/[^a-zA-Z\s]/g, "").includes(value.toUpperCase().normalize("NFD").replace(/[^a-zA-Z\s]/g, "")));
 
 
-    console.log(credenciamentos.map((credenciamento: any) => (credenciamento.enderecosolicitante.unSaude.razaosocial)))
+    console.log(credenciamentos.map((credenciamento: any) => (credenciamento)))
 
     const handleDeletarCred = async (id: number) => {
 
@@ -135,12 +136,23 @@ export function GerenciarCredenciamentos() {
                                                     <Button variant="unstyled">
                                                         <Stack>
                                                             <Stack mb="0.5" >
-                                                                <Checkbox colorScheme="teal">Aprovado</Checkbox>
+                                                                <Checkbox
+                                                                    colorScheme="teal"
+                                                                    isChecked={checkboxValue === "1"}
+                                                                    onChange={() => setCheckboxValue("1")}
+                                                                    value="1">
+                                                                    Aprovado
+                                                                </Checkbox>
                                                             </Stack>
                                                             <Stack borderBottomWidth={1} borderBottomColor="blackAlpha.400">
                                                             </Stack>
                                                             <Stack>
-                                                                <Checkbox colorScheme="teal">Reprovado</Checkbox>
+                                                                <Checkbox
+                                                                    colorScheme="teal"
+                                                                    isChecked={checkboxValue === "2"}
+                                                                    onChange={() => setCheckboxValue("2")}>
+                                                                    Aprovado
+                                                                </Checkbox>
                                                             </Stack>
                                                         </Stack>
                                                     </Button>
@@ -172,7 +184,7 @@ export function GerenciarCredenciamentos() {
                                                     <Td>{credenciamento.enderecosolicitante.unSaude.razaosocial}</Td>
                                                     <Td>{credenciamento.enderecosolicitado.unSaude.razaosocial}</Td>
                                                     <Td pl="1.8rem">{credenciamento.enderecosolicitado.enderecoxespecialidades.map((x: any) => x.especialidade.descricao)}</Td>
-                                                    <Td pl="2.5rem"><Icon fontSize="19" borderRadius="3rem" bg="green.500" as={BsCircle} /></Td>
+                                                    <Td pl="2.5rem"><Icon fontSize="19" borderRadius="3rem" bg="yellow.500" as={BsCircle} /></Td>
                                                     <Td></Td>
                                                     <Td>
                                                         <HStack spacing="5">
@@ -196,7 +208,7 @@ export function GerenciarCredenciamentos() {
                                                     <Td>{credenciamento.enderecosolicitante.unSaude.razaosocial}</Td>
                                                     <Td>{credenciamento.enderecosolicitado.unSaude.razaosocial}</Td>
                                                     <Td pl="1.8rem">{credenciamento.enderecosolicitado.enderecoxespecialidades.map((x: any) => x.especialidade.descricao)}</Td>
-                                                    <Td pl="2.5rem"><Icon fontSize="19" borderRadius="3rem" bg="green.500" as={BsCircle} /></Td>
+                                                    <Td pl="2.5rem"><Icon fontSize="19" borderRadius="3rem" bg="yellow.300" as={BsCircle} /></Td>
                                                     <Td></Td>
                                                     <Td>
                                                         <HStack spacing="5">
