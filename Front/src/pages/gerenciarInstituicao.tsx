@@ -83,7 +83,7 @@ export function GerenciarInstituicao() {
 
     const obterPessoas = async (idHospital: number) => {
         try {
-            const response = await api.get(`unsaude/profissionais/${idHospital}`);
+            const response = await api.get(`unsaude/obter/profissionais/${idHospital}`);
             if (response.data[0] && response.data[0].enderecos) {
                 setEnderecoxPessoas(response.data[0].enderecos[0].enderecoxpessoas);
                 setRoleEnderecoxpessoas(hospitais.flatMap((x: any) => x.rolesid)[0])

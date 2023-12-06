@@ -134,7 +134,7 @@ export function EditarUsuarioModal(
                     backdropBlur='2px'
                 />
                 <ModalContent>
-                    <ModalHeader fontSize="2xl">Editar dados{JSON.stringify(idProfissional)}</ModalHeader>
+                    <ModalHeader fontSize="2xl">Editar dados</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
                         <FormControl>

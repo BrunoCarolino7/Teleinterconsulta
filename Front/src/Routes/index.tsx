@@ -14,8 +14,8 @@ import { AlterarTelEmailToken } from '../pages/alterarTelEmailToken';
 import Layout from '../Layout';
 import { Login } from '../pages/login';
 import { GerenciarCredenciamentos } from '../pages/gerenciarCredenciamentos';
-import { MeuPerfil } from '../pages/MeuPerfil';
 import { Home } from '../Home';
+import { MeuPerfil } from '../pages/meuPerfil';
 
 export function Rotas() {
     return (

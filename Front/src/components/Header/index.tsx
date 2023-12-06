@@ -28,7 +28,7 @@ export function Header() {
                             spacing="80"
                         >
                             <>
-                                <Link to={'/login'}><Image src="/logo.png" width={180} alt="Logo Hospital das Clínicas" /></Link>
+                                <Link to={'/dashboard'}><Image src="/logo.png" width={180} alt="Logo Hospital das Clínicas" /></Link>
                                 <Image mt="5" src="/logoIcr.jpg" width={250} alt="Logo ICR" />
                             </>
                         </HStack>

@@ -2235,3 +2235,11 @@ alter table Solicitacao
 add constraint FK_AgendamentoId
 foreign key (AgendamentoId)
 references Agendamento (SolicitacaoId);
+
+
+
+
+
+
+
+

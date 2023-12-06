@@ -88,17 +88,18 @@ export function Login() {
      
 
         if (settoken) {
+            
             if (cpfValido) {
                 setLoading(true);
 
                 try {
                     const response = await api.post('usuario/login', {
-                        Cpf: cpfs,
-                        UsuarioId: null
+                        cpf: cpfs,
+                        settoken: settoken                        
                     });                    
                     salvaDadosPessoa(response.data);
                 
-                    if (response.status === 201) {                        
+                    if (response.status === 200) {                        
                         navigate(`/checktokenfoundcpf/${settoken}`);
                     }
                 } catch (error: any) {
@@ -117,7 +118,8 @@ export function Login() {
                     isClosable: true,
                 });
             }
-        } else {
+        }
+        else {
             toast({
                 title: 'Selecione onde receber o token',
                 status: 'warning',

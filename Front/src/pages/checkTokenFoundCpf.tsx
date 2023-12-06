@@ -18,7 +18,6 @@ export function CheckTokenFoundCpf() {
         lg: true,
     });
     const toast = useToast()
-    const { handleSubmit, formState: { isSubmitting } } = useForm();
     const { settoken } = useParams();
     const [email, setEmail] = useState('');
     const [ddd, setDdd] = useState('');
@@ -40,7 +39,6 @@ export function CheckTokenFoundCpf() {
             if (response.status === 200) {
                 const token = response.data.data;
                 localStorage.setItem('token', token);
-                console.log(token);
                 navigate('/dashboard');
             }
         } catch (error: any) {
@@ -101,11 +99,11 @@ export function CheckTokenFoundCpf() {
                         justifyContent="center"
                     >
 
-                        {settoken === '1' ? (
+                        {settoken === "1" ? (
                             <>
                                 <Text mt={["3rem", "5rem"]} align="center" fontSize={14}>O token foi enviado para o número:</Text>
 
-                                <Text fontWeight="bold" align="center" fontSize={14}>{`(${ddd}) ${tel}`}</Text>
+                                <Text fontWeight="bold" align="center" fontSize={14}>{`(${pessoa.ddd}) ${pessoa.telefone}`}</Text>
                             </>
                         ) :
                             <>
@@ -124,7 +122,7 @@ export function CheckTokenFoundCpf() {
                                 </PinInput>
                             </HStack>
                         </Flex>
-                        <Button isLoading={isSubmitting}>Validar</Button>
+                        <Button>Validar</Button>
                     </Flex>
 
                 </Flex>

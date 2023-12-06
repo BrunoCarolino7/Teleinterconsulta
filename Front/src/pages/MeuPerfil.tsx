@@ -38,7 +38,7 @@ export function MeuPerfil() {
     const [emailalternativo, setEmailalternativo] = useState('');
     const [numeroConselho, setNumeroConselho] = useState('');
     const [telefone2, setTelefoneAlternativo] = useState('');
-    const [tipoProfissional, setTipoProfissional] = useState([]);
+    const [tipoProfissional] = useState('Médico');
 
     const handleInput = async () => {
         Navigate('/homecnpj')
@@ -69,7 +69,7 @@ export function MeuPerfil() {
                 if (userId) {
                     const getUnSaudeUsuario = async () => {
                         try {
-                            const response = await api.get(`usuario/meuperfil/${userId}`)
+                            const response = await api.get(`usuario/obter/meuperfil/${userId}`)
 
                             setCpf(response.data.cpf)
                             setNome(response.data.nome)
@@ -80,7 +80,6 @@ export function MeuPerfil() {
                             setEmail(response.data.email)
                             setEmailalternativo(response.data.emailalternativo)
                             setNumeroConselho(response.data.numeroconselho)
-                            setTipoProfissional(response.data.enderecoxpessoas.flatMap((x: any) => x.tipoProfissional.descricao))
 
                         } catch (error) {
                             console.error("Erro na chamada da API:", error);
@@ -153,7 +152,7 @@ export function MeuPerfil() {
                                 <CustomCard label="Email para recuperação do token" marginBoxLeft={130} marginBoxBottom={12} marginLabelLeft={5} marginLabelBottom={0} />
                             </HStack>
                             <HStack >
-                                <Input name="" type="text" size="md" label="Profissão" value={tipoProfissional} />
+                                <Input name="" type="text" size="md" label="Profissão" isDisabled value={tipoProfissional} />
                                 <Input name="" type="number" size="md" label="Número do conselho de classe" value={numeroConselho} />
                             </HStack>
                         </Stack>
