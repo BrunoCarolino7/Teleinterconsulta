@@ -17,13 +17,9 @@ export function GerenciarInstituicao() {
 
     const [hospitais, setHospitais] = useState<any>([]);
     const [payload, setPayload] = useState<any>();
-    const [idUnSaude, setIdUnSaude] = useState<any>(0);
+    const [idUnSaude, setIdUnSaude] = useState(0);
     const [idEndereco, setIdEndereco] = useState(0);
     const [enderecoxPessoas, setEnderecoxPessoas] = useState<any>(idUnSaude === 0 && ['Selecione uma instituição']);
-    const [roleId, setRoleId] = useState('');
-    const [mostraNomeHospital, setMostraNomeHospital] = useState('');
-
-    const [profissao, setProfissao] = useState('');
     const [cpf, setCpf] = useState('');
     const [nome, setNome] = useState('');
     const [ddd, setDdd] = useState('');
@@ -35,6 +31,8 @@ export function GerenciarInstituicao() {
     const [telefone2, setTelefoneAlternativo] = useState('');
     const [roleEnderecoxpessoas, setRoleEnderecoxpessoas] = useState(0);
     const [hospitalSelecionado, setHospitalSelecionado] = useState<number | null>(null);
+    const [nomeHospitalSelecionado, setNomeHospitalSelecionado] = useState('');
+
 
 
     const [idUsuario, setIdUsuario] = useState(0);
@@ -56,12 +54,12 @@ export function GerenciarInstituicao() {
                 const userId = payloadToken.nameid;
                 setIdUsuarioLogado(Number(payloadToken.nameid));
 
-                if (userId) {
+                if (userId)
                     obterHospitais(userId);
-                }
-            } else {
+
+            } else
                 console.log("Token não válido");
-            }
+
         } else {
             console.log("Token não encontrado");
         }
@@ -73,11 +71,14 @@ export function GerenciarInstituicao() {
         try {
             const response = await api.get(`usuario/obter/${userId}`);
             setHospitais(response.data.enderecoxpessoas || []);
-            setMostraNomeHospital(response.data.enderecoxpessoas.map((hospital: any) => hospital.endereco.unSaude.razaosocial));
-
         } catch (error) {
             console.error("Erro na chamada da API:", error);
         }
+    }
+
+
+    const mostraNomeHospital = (nomeHospital: string) => {
+        setNomeHospitalSelecionado(nomeHospital)
     }
 
     const obterPessoas = async (idHospital: number) => {
@@ -240,7 +241,7 @@ export function GerenciarInstituicao() {
                                     <Tbody>
                                         {hospitais.length > 0 ? (
                                             hospitais.map((hospital: any, index: any) => (
-                                                <Tr bg={setColorHospitalSelecionado(hospital.id)} onClick={() => { obterPessoas(hospital.enderecoid); handleColorirHospitalSelecionado(hospital.id) }} key={index} _hover={{ cursor: "pointer" }} >
+                                                <Tr bg={setColorHospitalSelecionado(hospital.id)} onClick={() => { obterPessoas(hospital.enderecoid); handleColorirHospitalSelecionado(hospital.id); mostraNomeHospital(hospital.endereco.unSaude.razaosocial) }} key={index} _hover={{ cursor: "pointer" }} >
 
                                                     <Td>{hospital.endereco.unSaude.razaosocial}</Td>
                                                     <Td></Td>
@@ -267,7 +268,7 @@ export function GerenciarInstituicao() {
 
                     <Stack bg="whiteAlpha.700" p="6" boxShadow="md" mt="2rem" w="60%" ml="-18rem">
                         <Flex mb="8" justify="space-between" align="center">
-                            <Heading size="lg" fontWeight="normal">{idHospital === 0 ? `Profissionais` : `Profissionais - ${mostraNomeHospital}`}</Heading>
+                            <Heading size="lg" fontWeight="normal">{idHospital === 0 ? `Profissionais` : `Profissionais - ${nomeHospitalSelecionado}`}</Heading>
                             {idHospital !== 0 && roleEnderecoxpessoas === 3 &&
                                 <Button
                                     _hover={{ cursor: 'pointer', bg: 'gray.200' }}
