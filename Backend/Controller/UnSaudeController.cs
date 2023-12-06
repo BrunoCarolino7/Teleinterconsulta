@@ -39,7 +39,8 @@ public class UnSaudeController : ControllerBase
             }
 
             var unSaudeExcluidas = todasUnSaude
-                .Where(b => pessoa.Enderecoxpessoas != null && !pessoa.Enderecoxpessoas.Any(e => e.Endereco != null && e.Endereco.UnSaude != null && e.Endereco.UnSaude.Id == b.Id))
+                .Where(b => pessoa.Enderecoxpessoas != null && !pessoa.Enderecoxpessoas
+                .Any(e => e.Endereco != null && e.Endereco.UnSaude != null && e.Endereco.UnSaude.Id == b.Id))
                 .ToList();
 
             if (unSaudeExcluidas == null)
@@ -90,6 +91,21 @@ public class UnSaudeController : ControllerBase
 
         return Ok(unsaude);
     }
+
+    [HttpGet("obter/cnpj")]
+    public async Task<IActionResult> ObterTodasUnSaudePeloCnpj(
+    [FromServices] ModelContext context,
+    [FromQuery] string cnpj)
+    {
+        var unsaude = await context
+            .UnSaudes
+            .Include(b => b.Enderecos)
+            .ThenInclude(b => b.Enderecoxpessoas)
+            .FirstOrDefaultAsync(b => b.Cnpj == cnpj);
+
+        return Ok(unsaude);
+    }
+
 
 
     [HttpGet("obter/externas")]
@@ -268,6 +284,46 @@ public class UnSaudeController : ControllerBase
                 TipoUsuario = context.TipoUsuarios.Find(2),
                 TipoProfissionalid = enderecoxpessoa.TipoProfissionalId,
                 Roles = roles,
+            };
+
+            await context.Enderecoxpessoas.AddAsync(enderecoxpessoas);
+            await context.SaveChangesAsync();
+
+            return Ok("Criado");
+        }
+        catch (DbUpdateException)
+        {
+            return StatusCode(400, new ResultViewModel<string>("Erro no banco de dados!"));
+        }
+        catch
+        {
+            return StatusCode(500, "Erro interno");
+        }
+    }
+
+    [HttpPost("cadastrar/existente/{id:int}")]
+    public async Task<IActionResult> CadastrarUnSaudeExistente(
+        [FromServices] ModelContext context,
+        [FromBody] CadastroUnSaudeEnderecoDTO cadastroUnSaudeEnderecoDTO,
+        [FromRoute] int id)
+    {
+        RegisterEnderecoXPessoaViewModel enderecoxpessoa = cadastroUnSaudeEnderecoDTO.RegisterEnderecoXPessoaViewModel;
+
+        try
+        {
+            var pessoa = await context
+                .Pessoas
+                .Include(b => b.Enderecoxpessoas)
+                .ThenInclude(b => b.Roles)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            var enderecoxpessoas = new Enderecoxpessoa
+            {
+                Enderecoid = enderecoxpessoa.Enderecoid,
+                Pessoaid = pessoa!.Id,
+                TipoUsuario = context.TipoUsuarios.Find(2),
+                TipoProfissional = context.TipoProfissionals.Find(1),
+                Roles = context.Roles.Find(3),
             };
 
             await context.Enderecoxpessoas.AddAsync(enderecoxpessoas);
