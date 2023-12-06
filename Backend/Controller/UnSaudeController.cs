@@ -107,7 +107,6 @@ public class UnSaudeController : ControllerBase
     }
 
 
-
     [HttpGet("obter/externas")]
     public async Task<IActionResult> ObterUnSaudesExternas([FromServices] ModelContext context)
     {
@@ -122,6 +121,7 @@ public class UnSaudeController : ControllerBase
         return Ok(unsaude);
     }
 
+    //
     [HttpGet("obter/gestor/{id:int}")]
     public async Task<IActionResult> ObterGestorUnSaude([FromServices] ModelContext context, [FromRoute] int id)
     {
@@ -135,7 +135,7 @@ public class UnSaudeController : ControllerBase
         return Ok(unsaude);
     }
 
-    [HttpGet("profissionais/{id:int}")]
+    [HttpGet("obter/profissionais/{id:int}")]
     public async Task<IActionResult> GetProfissionaisAsync(
         [FromServices] ModelContext context,
         [FromRoute] int id)

@@ -1,10 +1,15 @@
-﻿using System.Net.Mail;
+﻿using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Net.Mail;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Blog.Models;
 
 public partial class Pessoa
 {
+
+
     public int Id { get; set; }
 
     public string? Cpf { get; set; }
@@ -46,7 +51,48 @@ public partial class Pessoa
     public virtual ICollection<Enderecoxpessoa> Enderecoxpessoas { get; set; } = new List<Enderecoxpessoa>();
 
 
-    public void EnviaToken()
+    public async Task<string> EnviaTokenPorSms()
+    {
+
+        string apiUrl = "http://integracaohc.phcnet.usp.br:57772/hcprod/api-intranet/sms/enfileirar";
+        string token = "4mT/T1g7xdPaqJTIYhWAjCFOuhaO0fz7ByMmQm2L5wg=";
+        Codigo = GerarToken();
+        CodigoExpirado = DateTime.Now.AddMinutes(1);
+
+        var requestData = new
+        {
+            celular = "11963115861",
+            mensagem = @$"Seu token para acesar o sistema de Teleinterconsulta é: {Codigo} ",
+            sistema = "ICr"
+        };
+
+        string jsonData = JsonConvert.SerializeObject(requestData);
+        using HttpClient cliente = new();
+
+        cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+        try
+        {
+            HttpResponseMessage response = await cliente.PostAsync(apiUrl, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string apiResponse = await response.Content.ReadAsStringAsync();
+                return apiResponse;
+            }
+            else
+            {
+                return new string("Erro ao tentar enviar o SMS");
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public void EnviaTokenPorEmail()
     {
         MailMessage mail = new MailMessage();
         SmtpClient smtpServer = new SmtpClient("smtp.gmail.com");
@@ -68,7 +114,7 @@ public partial class Pessoa
         string diretorioDoProjeto = AppDomain.CurrentDomain.BaseDirectory;
         Directory.SetCurrentDirectory(diretorioDoProjeto);
 
-        mail.Body = corpoDaMensagem(nome, Codigo);
+        mail.Body = CorpoDaMensagem(nome, Codigo);
         mail.IsBodyHtml = true;
         smtpServer.Port = 587;
 
@@ -78,7 +124,7 @@ public partial class Pessoa
 
     }
 
-    public static string corpoDaMensagem(string nome, string token)
+    public static string CorpoDaMensagem(string nome, string token)
     {
         string body =
 

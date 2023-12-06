@@ -69,7 +69,7 @@ namespace Blog.Controller
         }
 
 
-        [HttpGet("meuperfil/{id:int}")]
+        [HttpGet("obter/meuperfil/{id:int}")]
         public async Task<IActionResult> ObterMeuPerifilAsync(
          [FromServices] ModelContext context,
          [FromRoute] int id)
@@ -98,7 +98,7 @@ namespace Blog.Controller
                     Email = model.Email
                 };
 
-                pessoa.EnviaToken();
+                pessoa.EnviaTokenPorEmail();
 
                 context.Update(pessoa);
                 await context.SaveChangesAsync();
@@ -111,6 +111,8 @@ namespace Blog.Controller
                     Cpf = model.Cpf,
                     Telefone = model.Telefone
                 };
+
+                //pessoa.EnviaTokenPorSms();
 
                 context.Update(pessoa);
                 await context.SaveChangesAsync();
@@ -252,12 +254,19 @@ namespace Blog.Controller
                     }
                 }
             }
-            else if (usuario!.Cpf == model.Cpf && usuario!.Codigo is null)
+            else if (usuario!.Cpf == model.Cpf && model.SetToken == "1" && usuario!.Codigo is null)
             {
-                usuario!.EnviaToken();
+                await usuario!.EnviaTokenPorSms();
                 context.Update(usuario);
                 await context.SaveChangesAsync();
-                return StatusCode(201, usuario);
+                return Ok(usuario);
+            }
+            else if (usuario!.Cpf == model.Cpf && model.SetToken == "2" && usuario!.Codigo is null)
+            {
+                usuario!.EnviaTokenPorEmail();
+                context.Update(usuario);
+                await context.SaveChangesAsync();
+                return Ok(usuario);
             }
             else
             {
