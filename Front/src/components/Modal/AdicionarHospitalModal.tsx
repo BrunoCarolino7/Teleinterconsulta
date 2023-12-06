@@ -1,5 +1,6 @@
-import { Button, FormControl, FormLabel, HStack, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, useDisclosure, useToast } from "@chakra-ui/react"
-import { FormEvent, useEffect, useRef, useState } from "react"
+import { Button, FormControl, FormLabel, HStack, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useToast } from "@chakra-ui/react"
+import axios from "axios";
+import { FormEvent, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { Perfil } from "../Header/Perfil";
@@ -7,6 +8,13 @@ import { Perfil } from "../Header/Perfil";
 interface AdicionarHospitalModalProps {
     isOpen: boolean;
     onClose: () => void;
+    atualizaLista: any;
+}
+
+type EnderecoxPessoa = {
+    Enderecoid?: number | null;
+    Pessoaid?: number;
+    TipoProfissionalid?: any;
 }
 
 type UnSaudeData = {
@@ -17,11 +25,11 @@ type UnSaudeData = {
 }
 
 type TipoInstituicao = {
-    descricao: string;
+    Descricao: string;
 }
 
 type TipoEndereco = {
-    descricao: string;
+    Descricao: string;
 }
 
 type Endereco = {
@@ -37,13 +45,7 @@ type Endereco = {
     TelefoneAlternativo: string;
 }
 
-type EnderecoxPessoa = {
-    Pessoaid: number;
-    TipoProfissionalid: any;
-}
-
-export function AdicionarHospitalModal({ isOpen, onClose }: AdicionarHospitalModalProps) {
-
+export function AdicionarHospitalModal({ atualizaLista, isOpen, onClose }: AdicionarHospitalModalProps) {
     const toast = useToast()
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -63,79 +65,187 @@ export function AdicionarHospitalModal({ isOpen, onClose }: AdicionarHospitalMod
     const [telefone, setTelefone] = useState('');
     const [telefone2, setTelefone2] = useState('');
     const [tipoEndereco, setTipoEndereco] = useState('');
-    const [payload, setPayload] = useState<any>('');
-    const [id, setId] = useState('')
+    const [idUsuario, setIdUsuario] = useState(0);
+    const [usuarioJaPertenceAoHospital, setUsuarioJaPertenceAoHospital] = useState(false);
+    const token = localStorage.getItem('token');
+    const [caminho, setCaminho] = useState<number | null>(null);
+    const [idEndereco, setIdEndereco] = useState<number | null>(null);
 
 
-    const token = localStorage.getItem('Token');
+
 
     useEffect(() => {
         if (token) {
             const parts = token.split('.');
             if (parts.length === 3) {
                 const payloadToken = JSON.parse(atob(parts[1]));
-                setId(payloadToken.nameid)
-                console.log(payloadToken)
-
+                setIdUsuario(Number(payloadToken.nameid))
             } else {
                 console.log("Token não válido");
             }
         } else {
             console.log("Token não encontrado");
         }
-    }, []);
+    }, [token]);
 
+    const buscaUnSaudeCadastrada = async () => {
+        try {
+            const response2 = await api.get(`usuario/obter/${idUsuario}`)
+            const hospitais = response2.data.enderecoxpessoas.map((x: any) => x.endereco.unSaude.cnpj)
 
-    const AdicionarHospital = async (e: FormEvent) => {
+            const usuarioJaPertenceAoHospital = hospitais.some((hospitalCnpj: any) => hospitalCnpj === cnpj);
 
-        e.preventDefault();
+            if (usuarioJaPertenceAoHospital) {
+                toast({
+                    title: 'Instituição já cadastrada!',
+                    status: 'info',
+                    duration: 4000,
+                    isClosable: true,
+                });
+                setUsuarioJaPertenceAoHospital(true);
+            } else {
+                const response = await api.get(`unsaude/obter/cnpj?cnpj=${cnpj}`)
+                if (response.status && response.status === 204) {
+                    setUsuarioJaPertenceAoHospital(false)
+                    console.log("Não encontrado")
+                    setCaminho(1);
+                    //libera pra ele preencher dado por dado
+                } else {
+                    setUsuarioJaPertenceAoHospital(false)
+                    console.log(response.data.enderecos[0])
+                    let responseUnSaude = (response.data)
+                    let responseEndereco = (response.data.enderecos[0])
 
-        setLoading(true)
+                    setRazaoSocial(responseUnSaude.razaosocial)
+                    setNomeFantasia(responseUnSaude.nomefantasia)
+
+                    setIdEndereco(responseEndereco.id)
+                    setCEP(responseEndereco.cep)
+                    setPais(responseEndereco.pais)
+                    setEstado(responseEndereco.estado)
+                    setMunicipio(responseEndereco.cidade)
+                    setJardim(responseEndereco.bairro)
+                    setRua(responseEndereco.logradouro)
+                    setNumero(responseEndereco.numero)
+                    setDescricaoEndereco(responseEndereco.nome)
+                    setTelefone(responseEndereco.telefone)
+                    setTelefone2(responseEndereco.telefone2)
+                    setTipoEndereco(responseEndereco.tipoEndereco)
+                    setCaminho(2);
+                }
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const checkCep = async () => {
+        const ceps = CEP.replace(/[^0-9]/g, '');
 
         try {
-            const unSaude: UnSaudeData = {
-                Cnpj: cnpj,
-                RazaoSocial: razaoSocial,
-                NomeFantasia: nomeFantasia,
-                Perfilid: 2,
+            const response = await axios.get(`https://viacep.com.br/ws/${ceps}/json/`);
+
+            if (response.data.erro) {
+                toast({
+                    title: `CEP não encontrado`,
+                    status: 'error',
+                    duration: 2500,
+                    isClosable: true,
+                });
+                setRua('');
+                setJardim('');
+                setMunicipio('');
+                setPais('');
+                setEstado('');
+            } else {
+                const { bairro, localidade, logradouro, uf } = response.data;
+                setRua(logradouro);
+                setJardim(bairro);
+                setMunicipio(localidade);
+                setCEP(ceps);
+                setEstado(uf);
+                setPais('Brasil');
             }
+        } catch (error) {
+            toast({
+                title: `Necessário oito números`,
+                status: 'warning',
+                duration: 2500,
+                isClosable: true,
+            });
+            setRua('');
+            setJardim('');
+            setMunicipio('');
+            setEstado('');
+            setPais('');
+        }
+    }
 
-            const tipoInstituicao: TipoInstituicao = {
-                descricao: tipInstituicao
+    const AdicionarHospital = async (e: FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            if (caminho === 1) {
+                const unSaude: UnSaudeData = {
+                    Cnpj: cnpj,
+                    RazaoSocial: razaoSocial,
+                    NomeFantasia: nomeFantasia,
+                    Perfilid: 2,
+                }
+
+                const tipoInstituicao: TipoInstituicao = {
+                    Descricao: tipInstituicao
+                }
+
+                const tipEndereco: TipoEndereco = {
+                    Descricao: tipoEndereco
+                }
+
+                const endereco: Endereco = {
+                    Cep: CEP,
+                    Pais: pais,
+                    Estado: estado,
+                    Cidade: municipio,
+                    Bairro: jardim,
+                    Logradouro: rua,
+                    Numero: numero,
+                    Nome: descricaoEndereco,
+                    Telefone: telefone,
+                    TelefoneAlternativo: telefone2,
+                }
+
+                const enderecoxpessoa: EnderecoxPessoa = {
+                    Pessoaid: idUsuario,
+                    TipoProfissionalid: 1
+                }
+
+                const requestBody = {
+                    RegisterUnSaudeEnderecoViewModel: unSaude,
+                    RegisterEnderecoViewModel: endereco,
+                    RegisterTipoEnderecoViewModel: tipEndereco,
+                    RegisterTipoUnSaudeViewModel: tipoInstituicao,
+                    RegisterEnderecoXPessoaViewModel: enderecoxpessoa,
+                }
+
+                await api.post('unsaude/cadastrar', requestBody)
+                atualizaLista()
+                onClose()
+
+            } else if (caminho === 2) {
+
+                const enderecoxpessoa: EnderecoxPessoa = {
+                    Enderecoid: idEndereco
+                }
+
+                const requestBody = {
+                    RegisterEnderecoXPessoaViewModel: enderecoxpessoa
+                }
+
+                await api.post(`unsaude/cadastrar/existente/${idUsuario}`, requestBody)
+                atualizaLista()
+                onClose()
             }
-
-            const tipEndereco: TipoEndereco = {
-                descricao: tipoEndereco
-            }
-
-            const endereco: Endereco = {
-                Cep: CEP,
-                Pais: pais,
-                Estado: estado,
-                Cidade: municipio,
-                Bairro: jardim,
-                Logradouro: rua,
-                Numero: numero,
-                Nome: descricaoEndereco,
-                Telefone: telefone,
-                TelefoneAlternativo: telefone2,
-            }
-
-            const enderecoxpessoa: EnderecoxPessoa = {
-                Pessoaid: 1,
-                TipoProfissionalid: 1
-            }
-
-            const requestBody = {
-                RegisterUnSaudeEnderecoViewModel: unSaude,
-                RegisterEnderecoViewModel: endereco,
-                RegisterTipoEnderecoViewModel: tipEndereco,
-                RegisterTipoUnSaudeViewModel: tipoInstituicao,
-                RegisterEnderecoXPessoaViewModel: enderecoxpessoa,
-            }
-
-            //await api.post('https://localhost:7092/unsaude/cadastrar', requestBody)            
-
         } catch (error) {
             console.log(error)
         } finally {
@@ -164,7 +274,7 @@ export function AdicionarHospitalModal({ isOpen, onClose }: AdicionarHospitalMod
                                 <FormLabel>Razão Social</FormLabel>
                             </HStack>
                             <HStack>
-                                <Input value={cnpj} onChange={e => setCnpj(e.target.value)} />
+                                <Input value={cnpj} onChange={e => setCnpj(e.target.value)} onBlur={buscaUnSaudeCadastrada} />
                                 <Input value={razaoSocial} onChange={e => setRazaoSocial(e.target.value)} />
                             </HStack>
                         </FormControl>
@@ -186,7 +296,7 @@ export function AdicionarHospitalModal({ isOpen, onClose }: AdicionarHospitalMod
                                 <FormLabel>País</FormLabel>
                             </HStack>
                             <HStack>
-                                <Input value={CEP} onChange={e => setCEP(e.target.value)} />
+                                <Input value={CEP} onChange={e => setCEP(e.target.value)} onBlur={checkCep} />
                                 <Input value={pais} onChange={e => setPais(e.target.value)} />
                             </HStack>
                         </FormControl>
@@ -243,7 +353,7 @@ export function AdicionarHospitalModal({ isOpen, onClose }: AdicionarHospitalMod
                     </ModalBody>
 
                     <ModalFooter>
-                        <Button isLoading={loading} onClick={AdicionarHospital} colorScheme='facebook' mr={3}>
+                        <Button isDisabled={usuarioJaPertenceAoHospital} isLoading={loading} onClick={AdicionarHospital} colorScheme='facebook' mr={3}>
                             Salvar
                         </Button>
                         <Button onClick={onClose}>Cancel</Button>

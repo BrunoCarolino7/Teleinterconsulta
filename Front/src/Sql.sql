@@ -6,17 +6,12 @@ delete tipo_usuario
 delete roles
 
 delete pessoa
-delete enderecoxpessoa
-delete endereco
 delete un_saude
-
-
-SELECT * FROM endereco;
-SELECT * FROM un_saude;
-SELECT * FROM pessoa;
-SELECT * FROM enderecoxpessoa;
-SELECT * FROM ROLES;
-
+delete endereco
+delete enderecoxespecialidade
+delete enderecoxpessoa
+delete credenciamento
+delete solicitacao
 
 SELECT * FROM PERFIL
 INSERT INTO PERFIL (DESCRICAO) VALUES ('Interno');
@@ -37,21 +32,35 @@ INSERT INTO Roles (Nome) VALUES ('Master');
 INSERT INTO Roles (Nome) VALUES ('GestorEspecialidade');
 INSERT INTO Roles (Nome) VALUES ('Comum');
 
+SELECT * FROM pessoa;
+SELECT * FROM endereco where ;
+SELECT * FROM un_saude order by id;
+SELECT * FROM enderecoxpessoa where pessoaid = 60
+SELECT * FROM ROLES;
 SELECT * FROM Pessoa
 SELECT * FROM solicitacao
 SELECT * FROM enderecoxespecialidade
 SELECT * FROM especialidade
 SELECT * FROM agendamento
 SELECT * FROM paciente
+SELECT * FROM credenciamento order by id 
+
+update credenciamento
+set status = 1
+where id = 14
+
+delete un_saude where id = 14
+
 
 insert into agendamento (datahora,linkteleinter,statusagendamento, descricao) values(TO_DATE('2023-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS'), 'htttp://teleinter/dasd24das', 'aprovado', 'Caso aprovado pela complexidade' );
-
 insert into paciente (nome,datanascimento,genero,nomemae,cpf,justificativasolicitacao,historiapaciente) values('Enzo Silva', '02/08/2021', 'masculino', 'Kelly Silva','4703215321','kfbdkbfsklbfklsbfldsbflsdbflsdb','Paciente Enzo sofre desde que nasceu');
-
-insert into enderecoxespecialidade (enderecoid, especialidadeid) values (1, 1);
-
+insert into enderecoxespecialidade (enderecoid, especialidadeid) values (15, 1);
 insert into Especialidade (Descricao,Tipo_Profissionalid) values ('Cardiologia', 1);
-
+insert into un_saude (cnpj,razaosocial,nomefantasia,perfilid) values ('65454321321', 'Hospital Nossa Senhora de Fátima', 'Hospital Nossa Senhora de Fátima', 2);
+insert into endereco (nome,logradouro,numero, bairro, cidade, estado, cep, pais,telefone, telefone2,tipo_enderecoid,tipo_un_saudeid,un_saudeid) 
+values ('frente tres', 'Rua Sideropolis', 148, 'Jardim Maria Sampaio', 'Taboão da Serra', 'SP', '06773260','Brasil', 1354161, 2121321, 13, 13, 15 );
+insert into pessoa (cpf,nome,ddd,telefone,ddd2,telefone2,email,emailalternativo,numeroconselho) values('28213927885','Fabiano Gomes',11,994112577,11,994112577,'teste@teste.com','teste@teste.com', 65421 )
+insert into enderecoxpessoa(rolesid,enderecoid,pessoaid,tipo_usuarioid,tipo_profissionalid) values(3,13,60,2,1)
 
 insert into Solicitacao 
 (Datasolicitacao,

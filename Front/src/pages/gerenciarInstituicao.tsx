@@ -38,7 +38,7 @@ export function GerenciarInstituicao() {
 
 
     const [idUsuario, setIdUsuario] = useState(0);
-
+    const [idUsuarioLogado, setIdUsuarioLogado] = useState(0);
     const [idHospital, setIdHospital] = useState(0);
 
 
@@ -54,6 +54,7 @@ export function GerenciarInstituicao() {
                 const payloadToken = JSON.parse(atob(parts[1]));
                 setPayload(payloadToken);
                 const userId = payloadToken.nameid;
+                setIdUsuarioLogado(Number(payloadToken.nameid));
 
                 if (userId) {
                     obterHospitais(userId);
@@ -184,7 +185,9 @@ export function GerenciarInstituicao() {
         obterPessoas(idHospital)
     };
 
-    console.log(roleEnderecoxpessoas)
+    const adicionarHospital = async () => {
+        obterHospitais(idUsuarioLogado);
+    }
 
 
     return (
@@ -219,6 +222,7 @@ export function GerenciarInstituicao() {
                                 <AdicionarHospitalModal
                                     isOpen={isOpenAdicionarHospitalModal}
                                     onClose={onCloseAdicionarHospitalModal}
+                                    atualizaLista={adicionarHospital}
                                 />
                                 Adicionar hospital
                             </Button>
@@ -264,7 +268,7 @@ export function GerenciarInstituicao() {
                     <Stack bg="whiteAlpha.700" p="6" boxShadow="md" mt="2rem" w="60%" ml="-18rem">
                         <Flex mb="8" justify="space-between" align="center">
                             <Heading size="lg" fontWeight="normal">{idHospital === 0 ? `Profissionais` : `Profissionais - ${mostraNomeHospital}`}</Heading>
-                            {idHospital !== 0 && roleEnderecoxpessoas === 2 ? (
+                            {idHospital !== 0 && roleEnderecoxpessoas === 3 &&
                                 <Button
                                     _hover={{ cursor: 'pointer', bg: 'gray.200' }}
                                     as="a"
@@ -290,8 +294,6 @@ export function GerenciarInstituicao() {
                                     />
                                     Adicionar usuário
                                 </Button>
-                            ) :
-                                ""
                             }
                         </Flex>
 
